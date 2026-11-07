@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0d1513">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BP IT Lernen">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>BP IT Lernen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: eine schmale Arbeitsspalte, oben Status, darunter Reiter; Karten wie Prüfbögen */
+:root{
+  --bg:#eef2f0; --surface:#ffffff; --surface-2:#f6f8f7; --line:#d4dcd8;
+  --ink:#14211d; --muted:#56665f; --accent:#1d6b58; --accent-ink:#ffffff; --accent-soft:#d9ebe5;
+  --good:#2e7a48; --good-soft:#dcefe2; --warn:#a8670f; --warn-soft:#f6e8cf; --bad:#b0393a; --bad-soft:#f5dcdc;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1513; --surface:#16211e; --surface-2:#1b2824; --line:#2b3b36;
+  --ink:#e2ebe7; --muted:#97a8a1; --accent:#5cc0a3; --accent-ink:#0b1a16; --accent-soft:#1f3a33;
+  --good:#6fcf8f; --good-soft:#1c3526; --warn:#e3a54a; --warn-soft:#3a2c14; --bad:#ec7b7b; --bad-soft:#3d1f1f;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1513; --surface:#16211e; --surface-2:#1b2824; --line:#2b3b36;
+  --ink:#e2ebe7; --muted:#97a8a1; --accent:#5cc0a3; --accent-ink:#0b1a16; --accent-soft:#1f3a33;
+  --good:#6fcf8f; --good-soft:#1c3526; --warn:#e3a54a; --warn-soft:#3a2c14; --bad:#ec7b7b; --bad-soft:#3d1f1f;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.5;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:12px 48px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.35rem}h3{font-size:1.05rem}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:6px 10px}
+.brand{display:flex;flex-direction:column}
+.brand h1{font-size:1.3rem;letter-spacing:.01em}
+.brand small{color:var(--muted);font-size:.8rem}
+.pill{font-family:var(--f-mono);font-size:.75rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface);white-space:nowrap}
+.pill.ok{color:var(--good);border-color:var(--good)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tabs button{font:600 .95rem var(--f-body);background:none;border:0;color:var(--muted);padding:10px 12px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button{font-family:var(--f-body)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{font:600 1rem var(--f-body);padding:11px 18px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{font-size:.85rem;padding:7px 12px}
+.btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stack{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+/* Heute */
+.today-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.figure{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px}
+.figure b{display:block;font-family:var(--f-mono);font-size:1.7rem;font-weight:600;line-height:1.1}
+.notice{border-left:4px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:6px}
+.notice.calm{border-left-color:var(--accent);background:var(--accent-soft)}
+/* Karte */
+.cardhead{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chip{font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.chip.teil{color:var(--accent);border-color:var(--accent)}
+.q{font-size:1.12rem;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.answer{border-top:1px dashed var(--line);margin-top:14px;padding-top:14px;min-width:0;overflow-wrap:anywhere}
+.expl{color:var(--muted);font-size:.92rem;margin-top:8px}
+.src{color:var(--muted);font-size:.78rem;margin-top:10px;font-family:var(--f-mono)}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;font:inherit}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt .k{font-family:var(--f-mono);color:var(--muted);min-width:1.2em}
+.opt .why{display:block;font-size:.86rem;margin-top:6px;color:var(--ink)}
+.opt.right .why::before{content:"✓ ";color:var(--good);font-weight:700}
+.opt.wrong .why::before{content:"✗ ";color:var(--bad);font-weight:700}
+.opt.miss .why::before{content:"✓ ";color:var(--good);font-weight:700}
+.opt.miss{border-color:var(--good);border-style:dashed}
+.opt .why.neutral::before{content:"· ";color:var(--muted)}
+.lesson{border-left:4px solid var(--bad);background:var(--bad-soft);padding:10px 12px;border-radius:6px;margin-top:10px;font-size:.92rem}
+.lesson b{color:var(--bad)}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:.85rem;padding:4px 0}
+input[type=text],select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);color:var(--ink);max-width:100%}
+input.right,select.right{border-color:var(--good);background:var(--good-soft)}
+input.wrong,select.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.gap{width:9em}
+.fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px 12px;align-items:center;margin-top:12px}
+.pairs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 12px;align-items:center;margin-top:12px}
+.pairs select{width:100%}
+.rate{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.rate button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px}
+.rate small{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.rate .again{border-color:var(--bad)}
+.rate .hint{box-shadow:0 0 0 3px var(--accent-soft);border-color:var(--accent)}
+.progress{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.progress span{display:block;height:100%;background:var(--accent)}
+.result{font-weight:600;margin-top:10px}
+.result.ok{color:var(--good)}.result.no{color:var(--bad)}
+code{font-family:var(--f-mono);font-size:.92em;background:var(--surface-2);padding:1px 4px;border-radius:3px}
+/* Stoff + Statistik */
+.list{display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.bar{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.bar span{display:block;height:100%;background:var(--accent)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);font-size:.92rem}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.n{text-align:right;font-family:var(--f-mono)}
+.chart{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:6px;align-items:end;height:110px;margin-top:8px}
+.chart div{background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.chart div.zero{background:var(--line)}
+.chart-l{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:6px;font-family:var(--f-mono);font-size:.68rem;color:var(--muted);text-align:center;margin-top:4px}
+.big{font-family:var(--f-mono);font-size:2.2rem;font-weight:600;line-height:1}
+input[type=range]{width:100%;accent-color:var(--accent)}
+@media (max-width:520px){.today-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.figure b{font-size:1.35rem}.fields,.pairs{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.item.kl{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app" hidden>
+  <header class="top">
+    <div class="brand"><h1>BP IT Lernen</h1><small>Bachelor Professional IT · Systemintegration und Vernetzung · ZAW Hannover<span id="stand"></span></small></div>
+    <span id="sync" class="pill">Lade …</span>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="t-heute" data-tab="heute" aria-selected="true">Heute</button>
+    <button role="tab" id="t-stoff" data-tab="stoff" aria-selected="false">Stoff</button>
+    <button role="tab" id="t-statistik" data-tab="statistik" aria-selected="false">Statistik</button>
+    <button role="tab" id="t-klausur" data-tab="klausur" aria-selected="false">Klausur</button>
+    <button role="tab" id="t-daten" data-tab="daten" aria-selected="false">Daten</button>
+  </nav>
+  <main>
+    <section id="v-heute" class="stack"></section>
+    <section id="v-lernen" class="stack" hidden></section>
+    <section id="v-stoff" class="stack" hidden></section>
+    <section id="v-statistik" class="stack" hidden></section>
+    <section id="v-klausur" class="stack" hidden></section>
+    <section id="v-daten" class="stack" hidden></section>
+  </main>
+</div>
+
+<div id="lader" class="wrap" style="padding:40px 16px;font-family:system-ui,sans-serif">Lädt …</div>
+<script>
+window.__appStart = function(){
+"use strict";
+/* ---------- Daten ---------- */
+const D = window.LERNDATEN || {teile:{},wochen:{},pruefungen:[],karten:[]};
+const KARTEN = D.karten || [];
+const BYID = {}; KARTEN.forEach((k,i)=>{k._i=i; BYID[k.id]=k;});
+const TEILE = D.teile || {};
+const WOCHEN = D.wochen || {};
+const WOCHEN_SORT = Object.keys(WOCHEN).sort();
+const LS_KEY = "bpit-lernstand-v1", LS_DEV = "bpit-geraet";
+const UPDATE_URL = /^https:\/\/drive\.google\.com\//.test(D.update_url||"") ? D.update_url : "";
+{ const st = document.getElementById("stand"); if (st && D.stand){ const [y,m,d] = D.stand.split("-"); st.textContent = " · Kartenstand "+d+"."+m+"."+y; } }
+
+/* ---------- Hilfen ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const dstr = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today = () => dstr(new Date());
+const addDays = (s,n) => { const d = new Date(s+"T12:00:00"); d.setDate(d.getDate()+n); return dstr(d); };
+const daysBetween = (a,b) => Math.round((new Date(b+"T12:00:00") - new Date(a+"T12:00:00"))/864e5);
+const fmtDate = s => { const [y,m,d] = s.split("-"); return d+"."+m+"."+y; };
+const rand = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const norm = s => String(s).trim().toLowerCase().replace(/\s+/g," ").replace(/[„“"']/g,"");
+const num = s => { const t = String(s).trim().replace(/\s/g,"").replace(/€/g,""); if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) return parseFloat(t.replace(/\./g,"").replace(",",".")); return parseFloat(t.replace(",",".")); };
+const fmtNum = (n,dec=2) => n.toLocaleString("de-DE",{maximumFractionDigits:dec});
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k,v); return true; } catch(e){ return false; } };
+function intervalText(i){ if (i<=0) return "heute"; if (i===1) return "1 Tag"; if (i<31) return i+" Tage"; const m = Math.round(i/30); return m===1?"1 Monat":m+" Monate"; }
+
+/* ---------- Lernstand ---------- */
+let DEV = lsGet(LS_DEV); if (!DEV){ DEV = "g"+Math.random().toString(36).slice(2,8); lsSet(LS_DEV, DEV); }
+let S = { cards:{}, log:{}, settings:{min:30,t:0}, klausuren:{} };
+function mergeInto(target, src){
+  if (!src) return false; let changed = false;
+  for (const id in (src.cards||{})){ const a = target.cards[id], b = src.cards[id]; if (b && (!a || (b.l||0) > (a.l||0))){ target.cards[id] = b; changed = true; } }
+  for (const day in (src.log||{})){ target.log[day] = target.log[day] || {}; for (const dev in src.log[day]){ const a = target.log[day][dev], b = src.log[day][dev]; if (!a || (b.n||0) > (a.n||0) || (b.s||0) > (a.s||0)){ target.log[day][dev] = {n:Math.max(b.n||0,a?a.n||0:0), s:Math.max(b.s||0,a?a.s||0:0)}; changed = true; } } }
+  target.klausuren = target.klausuren || {};
+  for (const id in (src.klausuren||{})){ const a = target.klausuren[id], b = src.klausuren[id]; if (b && (!a || (b.t||0) > (a.t||0))){ target.klausuren[id] = b; changed = true; } }
+  if (src.settings && (src.settings.t||0) > (target.settings.t||0)){ target.settings = Object.assign({}, src.settings); changed = true; }
+  return changed;
+}
+try { const raw = lsGet(LS_KEY); if (raw) mergeInto(S, JSON.parse(raw)); } catch(e){}
+
+/* Speicher: lokal im Browser */
+let DB = null, UID = null, dirty = new Set(), flushTimer = null, flushing = false, syncState = "local";
+function kwOf(id){ const k = BYID[id]; return k ? k.kw : "sonst"; }
+function docName(kw){ return "kw_"+kw.replace(/[^A-Za-z0-9_\-.]/g,"_"); }
+function markDirty(id){ if (id) dirty.add(docName(kwOf(id))); dirty.add("meta"); persist(); }
+function persist(){
+  lsSet(LS_KEY, JSON.stringify(S));
+  if (!DB) return;
+  setSync("saving");
+  clearTimeout(flushTimer); flushTimer = setTimeout(flush, 1500);
+}
+async function flush(){
+  if (!DB || flushing) return; flushing = true;
+  try {
+    while (dirty.size){
+      const name = dirty.values().next().value; dirty.delete(name);
+      let body;
+      if (name === "meta") body = { log:S.log, settings:S.settings, t:Date.now() };
+      else if (name.startsWith("kl_")) body = { k: S.klausuren[name.slice(3)] || null, t:Date.now() };
+      else { const cards = {}; for (const id in S.cards) if (docName(kwOf(id)) === name) cards[id] = S.cards[id]; body = { cards, t:Date.now() }; }
+      await DB.doc("data/users/"+UID+"/"+name).set(body);
+    }
+    setSync("ok");
+  } catch(e){ setSync("err", e && e.code); }
+  flushing = false;
+  if (dirty.size) flush();
+}
+function setSync(s, code){
+  syncState = s; const el = $("#sync");
+  if (s === "ok"){ el.textContent = "Synchronisiert"; el.className = "pill ok";  }
+  else if (s === "saving"){ el.textContent = "Speichere …"; el.className = "pill"; }
+  else if (s === "err"){ el.textContent = "Nicht synchronisiert"; el.className = "pill warn"; el.title = "Speichern fehlgeschlagen ("+(code||"unbekannt")+"). Der Stand bleibt in diesem Browser und wird beim nächsten Speichern erneut gesendet."; }
+  else { el.textContent = "Nur dieses Gerät"; el.className = "pill"; el.title = "Offline-Version: Lernstand liegt nur in diesem Browser. Über Daten exportieren und importieren abgleichen."; }
+}
+setSync("local");
+
+/* ---------- Wiederholungsplan (3 Knöpfe, Anki-Prinzip) ---------- */
+function schedule(st, g){
+  st = st ? Object.assign({}, st) : { r:0, i:0, e:2.5, n:0 };
+  const t = today(); if (!st.f) st.f = t;
+  if (g === 0){ if (st.r > 0) st.n = (st.n||0)+1; st.r = 0; st.i = 0; st.e = Math.max(1.3, st.e-0.2); st.d = t; }
+  else if (g === 1){ st.i = st.r===0 ? 1 : st.r===1 ? 3 : Math.max(st.i+1, Math.round(st.i*st.e)); st.r++; }
+  else { st.i = st.r===0 ? 3 : st.r===1 ? 6 : Math.max(st.i+2, Math.round(st.i*st.e*1.3)); st.e = Math.min(3, st.e+0.15); st.r++; }
+  st.i = Math.min(st.i, 365); if (g > 0) st.d = addDays(t, st.i);
+  st.l = Date.now(); return st;
+}
+function minutes(){ return Math.min(90, Math.max(10, S.settings.min||30)); }
+function newToday(){ const t = today(); let n = 0; for (const id in S.cards) if (S.cards[id].f === t) n++; return n; }
+function dueIds(){ const t = today(); return KARTEN.filter(k => S.cards[k.id] && S.cards[k.id].d <= t).map(k => k.id); }
+function newIds(){ return KARTEN.filter(k => !S.cards[k.id]).sort((a,b) => (a.kw<b.kw?-1:a.kw>b.kw?1:a._i-b._i)).map(k => k.id); }
+function plan(){
+  const due = dueIds(), m = minutes();
+  const quota = Math.round(m*0.5);
+  const allowed = Math.max(0, Math.min(quota - newToday(), m*2 - due.length));
+  const neu = newIds().slice(0, allowed);
+  return { due, neu, quota };
+}
+function nextExam(){ const t = today(); return (D.pruefungen||[]).filter(p => p.datum >= t).sort((a,b) => a.datum < b.datum ? -1 : 1)[0]; }
+
+/* ---------- Ansicht ---------- */
+let view = "heute";
+function show(v){
+  view = v;
+  ["heute","lernen","stoff","statistik","klausur","daten"].forEach(x => $("#v-"+x).hidden = x !== v);
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === v || (v === "lernen" && b.dataset.tab === "heute"))));
+  render();
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { if (view === "lernen") endSession(true); if (KL){ klSpeichern(true); clearInterval(klTimer); } KL = null; show(b.dataset.tab); }));
+function render(){ if (view === "heute") renderHeute(); else if (view === "stoff") renderStoff(); else if (view === "statistik") renderStat(); else if (view === "klausur") renderKlausur(); else if (view === "daten") renderDaten(); }
+
+function renderHeute(){
+  const el = $("#v-heute");
+  if (!KARTEN.length){ el.innerHTML = '<div class="panel"><h2>Noch keine Karten</h2><p class="muted">Die Datei <code>karten.js</code> fehlt oder ist leer. Sie muss neben <code>lernapp.html</code> liegen.</p></div>'; return; }
+  const p = plan(), ex = nextExam(), m = minutes();
+  const total = p.due.length + p.neu.length;
+  let examHtml = "";
+  if (ex){ const n = daysBetween(today(), ex.datum); examHtml = `<div class="notice ${n>28?"calm":""}"><b>${esc(ex.titel)}</b> am ${fmtDate(ex.datum)}: noch ${n} ${n===1?"Tag":"Tage"}.${n<=28 && ex.teil ? ` <button class="btn small" id="exam-practice">Teil ${ex.teil} wiederholen</button>`:""}</div>`; }
+  else if (!(D.pruefungen||[]).length) examHtml = `<div class="notice calm">Noch keine Prüfungstermine hinterlegt. Sie kommen aus <code>00_Organisation</code>, sobald der Stoffplan vorliegt.</div>`;
+  const streak = calcStreak();
+  el.innerHTML = `
+    <div class="panel stack">
+      <div><span class="label">${fmtDate(today())}</span><h2>${total ? "Heute stehen "+total+" Karten an" : "Für heute ist alles erledigt"}</h2></div>
+      <div class="today-grid">
+        <div class="figure"><span class="label">Fällig</span><b>${p.due.length}</b></div>
+        <div class="figure"><span class="label">Neu</span><b>${p.neu.length}</b></div>
+        <div class="figure"><span class="label">Serie</span><b>${streak}</b></div>
+      </div>
+      <p class="muted" style="margin:0">Lernzeit ${m} Minuten, bis zu ${p.quota} neue Karten am Tag. Heute schon neu gelernt: ${newToday()}.</p>
+      <div class="row"><button class="btn primary" id="start" ${total?"":"disabled"}>Lernen starten</button>
+      ${total?"":'<button class="btn" id="extra">Trotzdem üben</button>'}
+      <button class="btn" id="fehler" ${fehlerIds().length?"":"disabled"}>Fehlerkiste (${fehlerIds().length})</button></div>
+      <p class="muted" style="margin:0;font-size:.85rem">Fehlerkiste: alle Karten, die du falsch hattest. Eine Karte verlässt die Kiste, wenn du sie zweimal hintereinander richtig hast.</p>
+    </div>
+    ${examHtml}
+    <div class="panel stack" id="gezielt"><h2>Gezielt lernen</h2>
+      <p class="muted" style="margin:0">Wähle Kalenderwoche, Themengebiet oder Prüfungsteil und wie lange du lernen willst. Leer lassen heißt alles.</p>
+      <div class="pairs" style="grid-template-columns:minmax(0,9rem) minmax(0,1fr)">
+        <label for="gw">Kalenderwoche</label><select id="gw"><option value="">alle Wochen</option>${WOCHEN_SORT.filter(w => KARTEN.some(k => k.kw === w)).sort((a,b) => wkey(a) < wkey(b) ? -1 : 1).map(w => `<option value="${esc(w)}">${esc((WOCHEN[w]||{}).titel||w)} (${KARTEN.filter(k => k.kw === w).length})</option>`).join("")}</select>
+        <label for="gt">Themengebiet</label><select id="gt"></select>
+        <label for="gp">Prüfungsteil</label><select id="gp"><option value="">alle Teile</option>${Object.keys(TEILE).map(t => `<option value="${t}">Teil ${t} · ${esc(TEILE[t].name)}</option>`).join("")}</select>
+        <label for="gm">Was</label><select id="gm"><option value="plan">Fällige und neue Karten</option><option value="alle">Alle Karten der Auswahl</option><option value="fehler">Nur meine Fehler</option></select>
+      </div>
+      <div><span class="label">Zeit</span><div class="row" id="gz" style="margin-top:6px">${[10,20,30,45,60,90].map(x => `<button class="btn small" data-z="${x}" aria-pressed="${x===m}">${x} min</button>`).join("")}</div></div>
+      <div class="row"><button class="btn primary" id="gstart">Los</button><span class="muted" id="ginfo"></span></div>
+    </div>`;
+  const s = $("#start"); if (s) s.onclick = () => startSession(p.due.concat(p.neu).map(id => ({id})), "Tagesplan");
+  const x = $("#extra"); if (x) x.onclick = () => startSession(shuffle(KARTEN.filter(k => S.cards[k.id])).slice(0, m*2).map(k => ({id:k.id, ueben:true})), "Freies Üben");
+  const fk = $("#fehler"); if (fk) fk.onclick = () => startSession(shuffle(fehlerIds()).map(id => ({id, ueben:true, fehler:true})), "Fehlerkiste");
+  setupGezielt();
+  const ep = $("#exam-practice"); if (ep) ep.onclick = () => practiseFilter(k => String(k.teil) === String(ex.teil), "Teil "+ex.teil);
+}
+function wkey(w){ return w.endsWith("VORB") ? w.slice(0,4)+"-KW00" : w; }
+let GZ = null;
+function gezieltListe(){
+  const w = $("#gw").value, t = $("#gt").value, p = $("#gp").value, mode = $("#gm").value, td = today();
+  let ks = KARTEN.filter(k => (!w || k.kw === w) && (!t || k.thema === t) && (!p || String(k.teil) === p));
+  if (mode === "fehler") ks = ks.filter(k => S.cards[k.id] && S.cards[k.id].lw);
+  const due = ks.filter(k => S.cards[k.id] && S.cards[k.id].d <= td), neu = ks.filter(k => !S.cards[k.id]);
+  let list = mode === "plan" ? due.concat(neu) : mode === "fehler" ? shuffle(ks) : due.concat(neu, shuffle(ks.filter(k => S.cards[k.id] && S.cards[k.id].d > td)));
+  const max = Math.round((GZ || minutes()) * 2);
+  return { all: list.length, list: list.slice(0, max).map(k => ({ id:k.id, ueben: !!(S.cards[k.id] && S.cards[k.id].d > td) || mode === "fehler", fehler: mode === "fehler" })) };
+}
+function setupGezielt(){
+  if (!$("#gezielt")) return;
+  GZ = GZ || minutes();
+  const fillThemen = () => { const w = $("#gw").value, cur = $("#gt").value; const th = [...new Set(KARTEN.filter(k => !w || k.kw === w).map(k => k.thema))].sort((a,b) => a.localeCompare(b,"de")); $("#gt").innerHTML = `<option value="">alle Themen</option>` + th.map(x => `<option${x===cur?" selected":""}>${esc(x)}</option>`).join(""); };
+  const info = () => { const g = gezieltListe(); $("#ginfo").textContent = g.all ? `${g.list.length} von ${g.all} Karten für ${GZ} Minuten (etwa 30 Sekunden je Karte)` : "Keine Karten für diese Auswahl."; $("#gstart").disabled = !g.all; };
+  fillThemen();
+  $("#gw").onchange = () => { fillThemen(); info(); };
+  ["#gt","#gp","#gm"].forEach(id => $(id).onchange = info);
+  document.querySelectorAll("#gz button").forEach(b => { b.setAttribute("aria-pressed", String(+b.dataset.z === GZ)); b.onclick = () => { GZ = +b.dataset.z; document.querySelectorAll("#gz button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); info(); }; });
+  $("#gstart").onclick = () => { const g = gezieltListe(); const parts = [$("#gw").value && ((WOCHEN[$("#gw").value]||{}).titel||$("#gw").value).split(":")[0], $("#gt").value, $("#gp").value && "Teil "+$("#gp").value].filter(Boolean); startSession(g.list, parts.length ? parts.join(" · ") : "Gezielt"); };
+  info();
+}
+function fehlerIds(){ return KARTEN.filter(k => S.cards[k.id] && S.cards[k.id].lw).map(k => k.id); }
+function calcStreak(){ let n = 0, d = today(); if (!dayCount(d)) d = addDays(d,-1); while (dayCount(d)){ n++; d = addDays(d,-1); } return n; }
+function dayCount(d){ const x = S.log[d]; if (!x) return 0; let n = 0; for (const k in x) n += x[k].n||0; return n; }
+function daySecs(d){ const x = S.log[d]; if (!x) return 0; let s = 0; for (const k in x) s += x[k].s||0; return s; }
+
+function practiseFilter(fn, name){
+  const ks = KARTEN.filter(fn);
+  const t = today();
+  const items = shuffle(ks).map(k => ({ id:k.id, ueben: !!(S.cards[k.id] && S.cards[k.id].d > t) }));
+  startSession(items, name);
+}
+
+/* ---------- Lernsitzung ---------- */
+let Q = [], pos = 0, sess = null, cur = null;
+function startSession(items, name){
+  if (!items.length) return;
+  Q = items; pos = 0; sess = { name, start: Date.now(), done: 0, budgetShown: false };
+  show("lernen"); nextCard();
+}
+function logTime(){
+  if (!sess) return; const secs = Math.round((Date.now() - (sess.lastTick || sess.start))/1000); sess.lastTick = Date.now();
+  const t = today(); S.log[t] = S.log[t] || {}; const e = S.log[t][DEV] || {n:0,s:0}; e.s += Math.min(secs, 600); S.log[t][DEV] = e;
+}
+function endSession(silent){
+  if (sess){ logTime(); markDirty(null); }
+  sess = null; Q = []; cur = null; if (!silent) show("heute");
+}
+function nextCard(){
+  const el = $("#v-lernen");
+  if (pos >= Q.length){
+    const n = sess ? sess.done : 0; endSession(true); view = "lernen";
+    el.innerHTML = `<div class="panel stack"><h2>Sitzung beendet</h2><p class="muted" style="margin:0">${n} Karten bearbeitet. Der Stand ist gespeichert.</p><div class="row"><button class="btn primary" id="back">Zur Übersicht</button></div></div>`;
+    $("#back").onclick = () => show("heute"); return;
+  }
+  const item = Q[pos], k = BYID[item.id];
+  if (!k){ pos++; return nextCard(); }
+  cur = { item, k, checked:false, correct:null, gen:null, lesson:"" };
+  const elapsed = (Date.now() - sess.start)/60000;
+  const budget = elapsed >= minutes() && !sess.budgetShown;
+  if (budget) sess.budgetShown = true;
+  const w = WOCHEN[k.kw] || {}; const teil = TEILE[k.teil] || {};
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between"><span class="label">${esc(sess.name)} · Karte ${pos+1} von ${Q.length}${item.ueben?" · Übung":""}</span><button class="btn small" id="quit">Beenden</button></div>
+    <div class="progress"><span style="width:${Math.round(pos/Q.length*100)}%"></span></div>
+    ${budget ? `<div class="notice">Deine geplanten ${minutes()} Minuten sind um. Du kannst aufhören oder weitermachen.</div>` : ""}
+    <article class="panel" id="card">
+      <div class="cardhead"><span class="chip">${esc(k.kw)}</span>${k.teil?`<span class="chip teil">Teil ${esc(k.teil)}${teil.name?" · "+esc(teil.name):""}</span>`:""}${k.thema?`<span class="chip">${esc(k.thema)}</span>`:""}</div>
+      <div id="body"></div>
+      <div id="after"></div>
+    </article>`;
+  $("#quit").onclick = () => endSession(false);
+  TYPES[k.typ] ? TYPES[k.typ](k, $("#body")) : TYPES.qa(k, $("#body"));
+}
+function revealArea(html){
+  const k = cur.k;
+  const extra = (k.erklaerung ? `<div class="expl">${k.erklaerung}</div>` : "") + (k.quelle ? `<div class="src">Quelle: ${esc(k.quelle)}</div>` : "");
+  const st = S.cards[k.id];
+  const plain = cur.item.ueben && st;
+  const prev = [0,1,2].map(g => intervalText(schedule(st, g).i));
+  const res = cur.correct === null ? "" : `<div class="result ${cur.correct?"ok":"no"}">${cur.correct?"Richtig.":"Falsch. Lies die Erklärung, die Karte kommt in dieser Runde gleich noch einmal."}</div>`;
+  const lesson = cur.correct === false && cur.lesson ? `<div class="lesson">${cur.lesson}</div>` : "";
+  const hint = cur.correct === null ? -1 : cur.correct ? 1 : 0;
+  const rateHtml = cur.correct === false
+    ? `<div class="rate"><button class="btn again hint" data-g="0">Verstanden, weiter<small>kommt gleich wieder, landet in der Fehlerkiste</small></button></div>
+       <button class="linkbtn" id="selfok">Ich hatte es eigentlich richtig (Tippfehler)</button>`
+    : `<div class="rate">
+      <button class="btn again ${hint===0?"hint":""}" data-g="0">Nochmal<small>${plain?"wieder in dieser Runde":"heute erneut"}</small></button>
+      <button class="btn ${hint===1?"hint":""}" data-g="1">Gut<small>${plain?"Plan bleibt":prev[1]}</small></button>
+      <button class="btn" data-g="2">Leicht<small>${plain?"Plan bleibt":prev[2]}</small></button>
+    </div>`;
+  $("#after").innerHTML = `${res}${lesson}<div class="answer">${html||""}${extra}</div>${rateHtml}`;
+  document.querySelectorAll(".rate button").forEach(b => b.onclick = () => rate(+b.dataset.g));
+  const so = $("#selfok"); if (so) so.onclick = () => { cur.correct = true; rate(1); };
+  cur.checked = true;
+  const first = document.querySelector(".rate .hint") || document.querySelector(".rate button[data-g='1']"); if (first) first.focus({preventScroll:true});
+}
+function rate(g){
+  const { item, k } = cur;
+  const plain = item.ueben && S.cards[k.id];
+  if (!plain) S.cards[k.id] = schedule(S.cards[k.id], g);
+  if (g === 0 && S.cards[k.id]){ S.cards[k.id].w = (S.cards[k.id].w||0) + 1; S.cards[k.id].lw = today(); S.cards[k.id].ok = 0; S.cards[k.id].l = Date.now(); }
+  if (g > 0 && item.fehler && S.cards[k.id]){ S.cards[k.id].ok = (S.cards[k.id].ok||0) + 1; if (S.cards[k.id].ok >= 2){ delete S.cards[k.id].lw; S.cards[k.id].ok = 0; } S.cards[k.id].l = Date.now(); }
+  if (g === 0) Q.splice(Math.min(pos+3, Q.length), 0, { id:k.id, ueben:item.ueben, fehler:item.fehler });
+  const t = today(); S.log[t] = S.log[t] || {}; const e = S.log[t][DEV] || {n:0,s:0}; e.n++; S.log[t][DEV] = e;
+  logTime(); sess.done++; markDirty(k.id);
+  pos++; nextCard();
+}
+document.addEventListener("keydown", e => {
+  if (view !== "lernen" || !cur) return;
+  if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.key !== "Enter") return;
+  if (!cur.checked && (e.key === "Enter" || e.key === " ")){ const b = $("#check"); if (b){ e.preventDefault(); b.click(); } }
+  else if (cur.checked && ["1","2","3"].includes(e.key)){ e.preventDefault(); rate(+e.key - 1); }
+});
+
+/* ---------- Aufgabentypen ---------- */
+const TYPES = {
+  qa(k, el){
+    el.innerHTML = `<div class="q">${k.frage}</div><div class="row" style="margin-top:14px"><button class="btn primary" id="check">Antwort zeigen</button></div>`;
+    $("#check").onclick = () => { $("#check").remove(); revealArea(k.antwort); };
+  },
+  mc(k, el){
+    const multi = (k.richtig||[]).length > 1;
+    const order = shuffle(k.optionen.map((o,i) => i));
+    const why = Array.isArray(k.warum) ? k.warum : [];
+    el.innerHTML = `<div class="q">${k.frage}</div><div class="muted" style="font-size:.85rem;margin-top:4px">${multi?"Mehrere Antworten sind richtig. Alle richtigen anklicken, dann prüfen.":"Eine Antwort ist richtig. Antippen genügt."}</div>
+      <div class="opts">${order.map((i,n) => `<button class="opt" data-i="${i}" aria-pressed="false"><span class="k">${"ABCDEFGH"[n]}</span><span>${k.optionen[i]}<span class="why" hidden></span></span></button>`).join("")}</div>
+      ${multi?`<div class="row" style="margin-top:14px"><button class="btn primary" id="check">Prüfen</button></div>`:""}`;
+    const check = () => {
+      if (cur.checked) return;
+      const sel = [...el.querySelectorAll('.opt[aria-pressed="true"]')].map(b => +b.dataset.i);
+      const ok = new Set(k.richtig);
+      el.querySelectorAll(".opt").forEach(b => {
+        const i = +b.dataset.i;
+        if (ok.has(i)) b.classList.add(sel.includes(i) ? "right" : "miss"); else if (sel.includes(i)) b.classList.add("wrong");
+        const w = b.querySelector(".why");
+        if (why[i]){ w.innerHTML = why[i]; w.hidden = false; if (!ok.has(i) && !sel.includes(i)) w.classList.add("neutral"); }
+        b.disabled = true;
+      });
+      cur.correct = sel.length === ok.size && sel.every(i => ok.has(i));
+      if (!cur.correct){
+        const falsch = sel.filter(i => !ok.has(i)).map(i => k.optionen[i]);
+        cur.lesson = (falsch.length ? `<b>Deine Wahl:</b> ${falsch.join(" / ")}<br>` : "") + `<b>Richtig:</b> ${[...ok].map(i => k.optionen[i]).join(" / ")}`;
+      }
+      const c = $("#check"); if (c) c.remove(); revealArea(k.antwort || "");
+    };
+    el.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      if (cur.checked) return;
+      if (!multi){ el.querySelectorAll(".opt").forEach(x => x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); check(); return; }
+      b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
+    });
+    const c = $("#check"); if (c) c.onclick = check;
+  },
+  luecke(k, el){
+    const sols = [];
+    const html = k.text.replace(/\{\{(.+?)\}\}/g, (m, a) => { sols.push(a.split("|")); return `<input type="text" class="gap" id="gap${sols.length-1}" aria-label="Lücke ${sols.length}" autocomplete="off" spellcheck="false">`; });
+    el.innerHTML = `${k.frage?`<div class="q">${k.frage}</div>`:""}<div class="q" style="line-height:2.2;margin-top:6px">${html}</div><div class="row" style="margin-top:14px"><button class="btn primary" id="check">Prüfen</button></div>`;
+    $("#check").onclick = () => {
+      let all = true;
+      sols.forEach((alts, i) => { const inp = $("#gap"+i); const ok = alts.some(a => norm(a) === norm(inp.value)); inp.classList.add(ok?"right":"wrong"); inp.readOnly = true; if (!ok){ all = false; inp.value = inp.value ? inp.value+" → "+alts[0] : alts[0]; inp.style.width = Math.max(9, inp.value.length*0.62)+"em"; } });
+      cur.correct = all; $("#check").remove(); revealArea(k.antwort || "");
+    };
+  },
+  zuordnung(k, el){
+    const rights = shuffle(k.paare.map(p => p[1]));
+    el.innerHTML = `<div class="q">${k.frage}</div><div class="pairs">${k.paare.map((p,i) => `<label for="pair${i}">${p[0]}</label><select id="pair${i}"><option value="">bitte wählen</option>${rights.map(r => `<option>${esc(r)}</option>`).join("")}</select>`).join("")}</div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="check">Prüfen</button></div>`;
+    $("#check").onclick = () => {
+      let all = true;
+      k.paare.forEach((p,i) => { const s = $("#pair"+i); const ok = s.value === p[1]; s.classList.add(ok?"right":"wrong"); s.disabled = true; if (!ok){ all = false; s.insertAdjacentHTML("afterend", `<div></div><div class="expl" style="margin-top:0">richtig: ${esc(p[1])}</div>`); } });
+      cur.correct = all; $("#check").remove(); revealArea(k.antwort || "");
+    };
+  },
+  rechnen(k, el){
+    const g = GEN[k.gen]; if (!g){ el.innerHTML = `<p class="muted">Unbekannter Aufgabengenerator: ${esc(k.gen)}</p>`; return revealArea(""); }
+    const a = g(k.param || {}); cur.gen = a;
+    el.innerHTML = `${k.frage?`<div class="q">${k.frage}</div>`:""}<div class="q" style="margin-top:6px">${a.frage}</div>
+      <div class="fields">${a.felder.map((f,i) => `<label for="f${i}">${f.label}${f.einheit?` <span class="muted">(${f.einheit})</span>`:""}</label><input type="text" id="f${i}" inputmode="${f.art==="zahl"?"decimal":"text"}" autocomplete="off" spellcheck="false">`).join("")}</div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="check">Prüfen</button></div>`;
+    $("#check").onclick = () => {
+      let all = true;
+      a.felder.forEach((f,i) => {
+        const inp = $("#f"+i); const v = inp.value; let ok;
+        if (f.pruef) ok = f.pruef(v);
+        else if (f.art === "zahl") ok = Math.abs(num(v) - f.wert) <= (f.tol||0) + 1e-9;
+        else ok = norm(v) === norm(f.wert);
+        inp.classList.add(ok?"right":"wrong"); inp.readOnly = true; if (!ok){ all = false; inp.value = (v ? v+" → " : "") + (f.anzeige || (f.art==="zahl"?fmtNum(f.wert):f.wert)); }
+      });
+      cur.correct = all; $("#check").remove(); revealArea(a.loesung + (k.antwort ? "<br>"+k.antwort : ""));
+    };
+  }
+};
+
+/* ---------- Rechenaufgaben mit wechselnden Zahlen ---------- */
+const ip2s = n => [24,16,8,0].map(s => (n>>>s)&255).join(".");
+const GEN = {
+  subnetz(){
+    const pfx = rand(20,29);
+    const base = pick([[10,rand(0,255)],[172,rand(16,31)],[192,168]]);
+    const ip = ((base[0]<<24)|(base[1]<<16)|(rand(0,255)<<8)|rand(1,254))>>>0;
+    const mask = (0xFFFFFFFF << (32-pfx))>>>0;
+    const net = (ip & mask)>>>0, bc = (net | (~mask>>>0))>>>0, hosts = Math.pow(2,32-pfx)-2;
+    return {
+      frage:`Gegeben ist die Adresse <code>${ip2s(ip)}/${pfx}</code>.`,
+      felder:[{label:"Netzadresse",wert:ip2s(net)},{label:"Broadcastadresse",wert:ip2s(bc)},{label:"Nutzbare Hosts",art:"zahl",wert:hosts}],
+      loesung:`Maske /${pfx} = <code>${ip2s(mask)}</code>. Netz <code>${ip2s(net)}</code>, Broadcast <code>${ip2s(bc)}</code>, Hosts 2<sup>${32-pfx}</sup> − 2 = ${fmtNum(hosts,0)}. Erster Host <code>${ip2s(net+1)}</code>, letzter <code>${ip2s(bc-1)}</code>.`
+    };
+  },
+  ale(){
+    const av = rand(4,100)*5000, ef = rand(2,16)*5, aro = pick([0.1,0.2,0.25,0.5,1,2,4]);
+    const sle = av*ef/100, ale = sle*aro;
+    return {
+      frage:`Ein Server samt Daten hat einen Wert (AV) von ${fmtNum(av,0)} €. Bei einem Ransomware-Vorfall gehen ${ef} % des Werts verloren (EF). Erwartet wird der Vorfall ${fmtNum(aro)}-mal pro Jahr (ARO).`,
+      felder:[{label:"SLE",einheit:"€",art:"zahl",wert:sle,tol:1},{label:"ALE",einheit:"€",art:"zahl",wert:ale,tol:1}],
+      loesung:`SLE = AV × EF = ${fmtNum(av,0)} € × ${ef} % = ${fmtNum(sle)} €. ALE = SLE × ARO = ${fmtNum(sle)} € × ${fmtNum(aro)} = ${fmtNum(ale)} €.`
+    };
+  },
+  verfuegbarkeit(){
+    const p = pick([99,99.5,99.9,99.95,99.99]);
+    const min = (1-p/100)*365*24*60;
+    return {
+      frage:`Ein Dienst sichert eine Verfügbarkeit von ${fmtNum(p)} % pro Jahr zu (365 Tage, Betrieb rund um die Uhr). Wie lange darf er höchstens ausfallen?`,
+      felder:[{label:"Ausfallzeit pro Jahr",einheit:"Minuten, gerundet",art:"zahl",wert:Math.round(min),tol:1}],
+      loesung:`(100 % − ${fmtNum(p)} %) × 525.600 Minuten = ${fmtNum(min,1)} Minuten, also etwa ${fmtNum(min/60,2)} Stunden.`
+    };
+  },
+  raid(){
+    const lv = pick(["1","5","6","10"]);
+    const min = {"1":2,"5":3,"6":4,"10":4}[lv];
+    let n = lv==="1" ? 2 : lv==="10" ? pick([4,6,8]) : rand(min,8);
+    const tb = pick([1,2,4,8,12,16]);
+    const nutz = lv==="1" ? tb : lv==="5" ? (n-1)*tb : lv==="6" ? (n-2)*tb : n/2*tb;
+    const aus = lv==="6" ? 2 : 1;
+    const formel = lv==="1" ? "Spiegelung: nutzbar ist die Kapazität einer Platte" : lv==="5" ? `(n − 1) × Plattengröße = (${n} − 1) × ${tb} TB` : lv==="6" ? `(n − 2) × Plattengröße = (${n} − 2) × ${tb} TB` : `n / 2 × Plattengröße = ${n} / 2 × ${tb} TB`;
+    return {
+      frage:`Ein Server erhält ein <b>RAID ${lv}</b> aus ${n} Festplatten mit je ${tb} TB.`,
+      felder:[{label:"Nutzbare Kapazität",einheit:"TB",art:"zahl",wert:nutz,tol:0},{label:"Plattenausfälle, die sicher verkraftet werden",art:"zahl",wert:aus,tol:0}],
+      loesung:`${formel} = ${fmtNum(nutz,0)} TB nutzbar. RAID ${lv} verkraftet sicher ${aus} ${aus>1?"Plattenausfälle":"Plattenausfall"}${lv==="10"?" (mehr nur, wenn sie in verschiedenen Spiegelpaaren liegen)":""}. RAID ersetzt kein Backup.`
+    };
+  },
+  backupdauer(){
+    const gb = pick([200,500,800,1000,2000,5000,10000]);
+    const r = pick([[100,"Mbit/s"],[250,"Mbit/s"],[500,"Mbit/s"],[1,"Gbit/s"],[10,"Gbit/s"]]);
+    const mbit = r[1]==="Gbit/s" ? r[0]*1000 : r[0];
+    const h = gb*8000/mbit/3600;
+    const menge = gb>=1000 ? fmtNum(gb/1000)+" TB" : gb+" GB";
+    return {
+      frage:`Es sollen ${menge} über eine Verbindung mit ${r[0]} ${r[1]} gesichert werden. Rechne dezimal (1 TB = 1.000 GB, 1 GB = 8.000 Mbit), ohne Overhead und Kompression.`,
+      felder:[{label:"Dauer",einheit:"Stunden, auf eine Nachkommastelle",art:"zahl",wert:Math.round(h*10)/10,tol:0.1}],
+      loesung:`${fmtNum(gb,0)} GB × 8.000 Mbit/GB = ${fmtNum(gb*8000,0)} Mbit. Geteilt durch ${fmtNum(mbit,0)} Mbit/s = ${fmtNum(gb*8000/mbit,0)} s = ${fmtNum(h,1)} h. Passt das nicht ins Backup-Fenster: inkrementell sichern, deduplizieren oder schnellere Anbindung.`
+    };
+  },
+  zahlensystem(){
+    const n = rand(1,255);
+    return {
+      frage:`Wandle die Dezimalzahl <b>${n}</b> um.`,
+      felder:[
+        {label:"Binär",anzeige:n.toString(2).padStart(8,"0"),pruef:v => /^[01\s]+$/.test(v.trim()) && parseInt(v.replace(/\s/g,""),2) === n},
+        {label:"Hexadezimal",anzeige:n.toString(16).toUpperCase(),pruef:v => /^(0x)?[0-9a-f]+$/i.test(v.trim()) && parseInt(v.trim().replace(/^0x/i,""),16) === n}
+      ],
+      loesung:`${n} = <code>${n.toString(2).padStart(8,"0")}</code> (binär) = <code>0x${n.toString(16).toUpperCase()}</code>.`
+    };
+  }
+};
+
+/* ---------- Stoff ---------- */
+function stats(list){
+  let neu=0, aufbau=0, fest=0, schwach=0;
+  list.forEach(k => { const s = S.cards[k.id]; if (!s) neu++; else { if (s.i >= 21) fest++; else aufbau++; if ((s.n||0) >= 2) schwach++; } });
+  const n = list.length; const sicher = n ? (fest + 0.5*aufbau*(1))/n : 0;
+  return { n, neu, aufbau, fest, schwach, gesehen:n-neu, sicher };
+}
+function renderStoff(){
+  const el = $("#v-stoff");
+  const wk = WOCHEN_SORT.filter(w => KARTEN.some(k => k.kw === w));
+  el.innerHTML = `
+    <div class="panel"><h2>Nach Prüfungsteil</h2><div class="list" style="margin-top:6px">
+      ${Object.keys(TEILE).sort().map(t => { const s = stats(KARTEN.filter(k => String(k.teil) === t)); return `
+        <div class="item"><div><b>Teil ${t}: ${esc(TEILE[t].name)}</b> <span class="muted">· ${TEILE[t].gewicht} %</span><div class="muted" style="font-size:.85rem">${s.n} Karten, ${s.gesehen} gesehen</div></div>
+        <button class="btn small" data-teil="${t}" ${s.n?"":"disabled"}>Üben</button></div>`; }).join("")}
+    </div></div>
+    <div class="panel"><h2>Nach Woche</h2><div class="list" style="margin-top:6px">
+      ${wk.length ? wk.map(w => { const W = WOCHEN[w]||{}; const s = stats(KARTEN.filter(k => k.kw === w)); return `
+        <div class="item"><div style="min-width:0"><b>${esc(W.titel||w)}</b><div class="muted mono" style="font-size:.8rem">${esc(w)}${W.von?` · ${fmtDate(W.von)} bis ${fmtDate(W.bis)}`:""}</div>
+        <div class="bar" style="margin-top:6px"><span style="width:${s.n?Math.round(s.gesehen/s.n*100):0}%"></span></div>
+        <div class="muted" style="font-size:.8rem;margin-top:2px">${s.gesehen} von ${s.n} gesehen${s.schwach?`, ${s.schwach} oft vergessen`:""}${W.lernzettel?` · Lernzettel: ${esc(W.lernzettel)}`:""}</div></div>
+        <button class="btn small" data-kw="${esc(w)}">Üben</button></div>`; }).join("") : '<p class="muted">Noch keine Wochen.</p>'}
+    </div></div>`;
+  el.querySelectorAll("[data-teil]").forEach(b => b.onclick = () => practiseFilter(k => String(k.teil) === b.dataset.teil, "Teil "+b.dataset.teil));
+  el.querySelectorAll("[data-kw]").forEach(b => b.onclick = () => practiseFilter(k => k.kw === b.dataset.kw, b.dataset.kw));
+}
+
+/* ---------- Statistik ---------- */
+function renderStat(){
+  const el = $("#v-statistik");
+  const rows = Object.keys(TEILE).sort().map(t => ({ t, g: TEILE[t].gewicht, s: stats(KARTEN.filter(k => String(k.teil) === t)) }));
+  const withCards = rows.filter(r => r.s.n);
+  const gsum = withCards.reduce((a,r) => a + r.g, 0);
+  const gw = gsum ? withCards.reduce((a,r) => a + r.g*r.s.sicher, 0)/gsum : 0;
+  const t = today();
+  const fc = []; for (let i=0;i<7;i++){ const d = addDays(t,i); fc.push({ d, n: KARTEN.filter(k => S.cards[k.id] && (i===0 ? S.cards[k.id].d <= d : S.cards[k.id].d === d)).length }); }
+  const mx = Math.max(1, ...fc.map(x => x.n));
+  const tm = []; for (let i=13;i>=0;i--){ const d = addDays(t,-i); tm.push({ d, m: Math.round(daySecs(d)/60) }); }
+  const mm = Math.max(1, ...tm.map(x => x.m));
+  const wd = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  el.innerHTML = `
+    <div class="panel stack">
+      <div><span class="label">Gewichtete Sicherheit</span><div class="big">${Math.round(gw*100)} %</div>
+      <p class="muted" style="margin:4px 0 0">Gefestigte Karten (Abstand ab 21 Tagen) zählen voll, Karten im Aufbau halb. Gewichtet nach den Prüfungsteilen${withCards.length<rows.length?", bisher nur Teile mit Karten":""}.</p></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Teil</th><th>Gewicht</th><th>Karten</th><th>Neu</th><th>Aufbau</th><th>Gefestigt</th><th>Sicherheit</th></tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${r.t} ${esc(TEILE[r.t].name)}</td><td class="n">${r.g} %</td><td class="n">${r.s.n}</td><td class="n">${r.s.neu}</td><td class="n">${r.s.aufbau}</td><td class="n">${r.s.fest}</td><td class="n">${r.s.n?Math.round(r.s.sicher*100)+" %":"–"}</td></tr>`).join("")}
+      </tbody></table></div>
+    </div>
+    <div class="panel"><h3>Fällige Karten, nächste 7 Tage</h3>
+      <div class="chart" style="--cols:7">${fc.map(x => `<div class="${x.n?"":"zero"}" style="height:${Math.round(x.n/mx*100)}%" title="${x.n} Karten"></div>`).join("")}</div>
+      <div class="chart-l" style="--cols:7">${fc.map((x,i) => `<span>${i===0?"heute":wd[new Date(x.d+"T12:00:00").getDay()]}<br>${x.n}</span>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>Lernzeit, letzte 14 Tage</h3>
+      <div class="chart" style="--cols:14">${tm.map(x => `<div class="${x.m?"":"zero"}" style="height:${Math.round(x.m/mm*100)}%" title="${x.m} Minuten"></div>`).join("")}</div>
+      <div class="chart-l" style="--cols:14">${tm.map(x => `<span>${x.d.slice(8)}<br>${x.m}</span>`).join("")}</div>
+      <p class="muted" style="margin:8px 0 0;font-size:.85rem">Minuten pro Tag, alle Geräte zusammen. Serie: ${calcStreak()} Tage.</p>
+    </div>`;
+}
+
+/* ---------- Klausurmodus ---------- */
+const KLAUSUREN = D.klausuren || [];
+let KL = null, klTimer = null, klSave = null;
+function klZustand(k){ const z = S.klausuren[k.id]; if (!z) return "offen"; return z.abgegeben ? "abgegeben" : "läuft"; }
+function renderKlausur(){
+  const el = $("#v-klausur");
+  if (KL) return renderKlausurLauf();
+  if (!KLAUSUREN.length){ el.innerHTML = '<div class="panel"><h2>Noch keine Probeklausuren</h2><p class="muted" style="margin:0">Probeklausuren kommen mit den nächsten Updates.</p></div>'; return; }
+  el.innerHTML = `<div class="panel"><h2>Probeklausuren</h2><p class="muted" style="margin:4px 0 0">Wie in der Prüfung: Die Zeit läuft, Antworten werden laufend gespeichert. Nach der Abgabe kannst du deine Antworten exportieren.</p>
+    <div class="list" style="margin-top:6px">${KLAUSUREN.map(k => { const z = S.klausuren[k.id]; const st = klZustand(k); const pkt = k.aufgaben.reduce((a,x) => a + x.punkte, 0); return `
+    <div class="item kl"><div style="min-width:0"><b>${esc(k.titel)}</b><div class="muted" style="font-size:.85rem">Teil ${esc(k.teil)} · ${k.dauer_min} Minuten · ${pkt} Punkte · ${k.aufgaben.length} Aufgaben</div>
+    <div style="font-size:.85rem" class="${st==="abgegeben"?"":"muted"}">${st==="offen"?"noch nicht geschrieben":st==="läuft"?"begonnen "+new Date(z.start).toLocaleString("de-DE"):"abgegeben "+new Date(z.abgegeben).toLocaleString("de-DE")+(z.ergebnis?" · "+esc(z.ergebnis):"")}</div></div>
+    <div class="row">${st==="abgegeben"?`<button class="btn small" data-exp="${esc(k.id)}">Antworten exportieren</button><button class="btn small" data-ansehen="${esc(k.id)}">Ansehen</button>`:`<button class="btn small primary" data-start="${esc(k.id)}">${st==="läuft"?"Fortsetzen":"Starten"}</button>`}</div></div>`; }).join("")}
+    </div></div><p id="klmsg" class="muted" aria-live="polite"></p>`;
+  el.querySelectorAll("[data-start]").forEach(b => b.onclick = () => klStart(b.dataset.start));
+  el.querySelectorAll("[data-ansehen]").forEach(b => b.onclick = () => { KL = { k: KLAUSUREN.find(x => x.id === b.dataset.ansehen), nurLesen: true }; renderKlausurLauf(); });
+  el.querySelectorAll("[data-exp]").forEach(b => b.onclick = () => klExport(b.dataset.exp));
+}
+function klStart(id){
+  const k = KLAUSUREN.find(x => x.id === id); if (!k) return;
+  if (!S.klausuren[id]){ S.klausuren[id] = { start: Date.now(), antworten:{}, abgegeben:null, t:Date.now() }; dirty.add("kl_"+id); persist(); }
+  KL = { k, nurLesen:false }; renderKlausurLauf();
+}
+function klRest(){ const z = S.klausuren[KL.k.id]; return KL.k.dauer_min*60 - Math.floor((Date.now() - z.start)/1000); }
+function klUhr(){
+  const el = $("#kluhr"); if (!el || !KL) return;
+  const r = klRest(), a = Math.abs(r);
+  el.textContent = (r < 0 ? "+" : "") + Math.floor(a/60) + ":" + pad(a%60);
+  el.style.color = r < 0 ? "var(--bad)" : r < 600 ? "var(--warn)" : "";
+  $("#klhinweis").hidden = r >= 0;
+}
+function renderKlausurLauf(){
+  const el = $("#v-klausur"), k = KL.k, z = S.klausuren[k.id] || {antworten:{}};
+  const ro = KL.nurLesen;
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:2;border-bottom:1px solid var(--line)">
+      <div style="min-width:0"><span class="label">Teil ${esc(k.teil)} · ${k.dauer_min} Minuten</span><div style="font-weight:600">${esc(k.titel)}</div></div>
+      ${ro ? `<button class="btn small" id="klzurueck">Zurück</button>` : `<div class="row"><span class="big" id="kluhr" style="font-size:1.6rem"></span><button class="btn small" id="klpause">Unterbrechen</button></div>`}
+    </div>
+    <div class="notice" id="klhinweis" hidden>Die Prüfungszeit ist vorbei. Du kannst weiterschreiben, die Überziehung wird bei der Abgabe vermerkt.</div>
+    ${k.hilfsmittel ? `<p class="muted" style="margin:0">Hilfsmittel: ${esc(k.hilfsmittel)}</p>` : ""}
+    <div class="panel"><span class="label">Ausgangssituation</span><div style="margin-top:6px">${k.fall}</div></div>
+    ${k.aufgaben.map(a => `<div class="panel stack"><div class="row" style="justify-content:space-between"><b>Aufgabe ${esc(a.nr)}</b><span class="chip">${a.punkte} Punkte</span></div><div>${a.text}</div>
+      <label for="ka_${esc(a.nr)}" class="muted" style="font-size:.85rem">Deine Lösung</label>
+      <textarea id="ka_${esc(a.nr)}" data-nr="${esc(a.nr)}" rows="${Math.max(6, Math.round(a.punkte/2))}" style="font:inherit;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);resize:vertical" ${ro?"readonly":""}>${esc(z.antworten[a.nr]||"")}</textarea></div>`).join("")}
+    ${ro ? "" : `<div class="panel stack"><div id="klabgabe" class="row"><button class="btn primary" id="klab1">Abgeben</button><span class="muted" id="klsaved" style="font-size:.85rem"></span></div></div>`}`;
+  if (ro){ $("#klzurueck").onclick = () => { KL = null; renderKlausur(); }; return; }
+  el.querySelectorAll("textarea").forEach(t => t.addEventListener("input", () => { S.klausuren[k.id].antworten[t.dataset.nr] = t.value; clearTimeout(klSave); klSave = setTimeout(() => klSpeichern(false), 1200); }));
+  $("#klpause").onclick = () => { klSpeichern(true); clearInterval(klTimer); KL = null; renderKlausur(); };
+  $("#klab1").onclick = () => {
+    $("#klabgabe").innerHTML = `<span>Wirklich abgeben? Danach kannst du nichts mehr ändern.</span><button class="btn primary" id="klab2">Ja, abgeben</button><button class="btn" id="klab0">Weiter schreiben</button>`;
+    $("#klab0").onclick = () => { $("#klabgabe").innerHTML = `<button class="btn primary" id="klab1">Abgeben</button><span class="muted" id="klsaved" style="font-size:.85rem"></span>`; renderKlausurLauf(); };
+    $("#klab2").onclick = () => { klSpeichern(true); const z = S.klausuren[k.id]; z.abgegeben = Date.now(); z.minuten = Math.round((z.abgegeben - z.start)/60000); z.t = Date.now(); dirty.add("kl_"+k.id); persist(); clearInterval(klTimer); KL = null; renderKlausur(); klExport(k.id); };
+  };
+  clearInterval(klTimer); klUhr(); klTimer = setInterval(klUhr, 1000);
+}
+function klSpeichern(sofort){
+  if (!KL || KL.nurLesen || !S.klausuren[KL.k.id]) return;
+  document.querySelectorAll("#v-klausur textarea").forEach(t => { S.klausuren[KL.k.id].antworten[t.dataset.nr] = t.value; });
+  S.klausuren[KL.k.id].t = Date.now(); dirty.add("kl_"+KL.k.id); persist();
+  const s = $("#klsaved"); if (s) s.textContent = "Gespeichert " + new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+}
+async function klExport(id){
+  const k = KLAUSUREN.find(x => x.id === id), z = S.klausuren[id]; if (!k || !z) return;
+  const data = JSON.stringify({ app:"bpit-lernapp-klausur", klausur:id, titel:k.titel, teil:k.teil, dauer_min:k.dauer_min, gestartet:new Date(z.start).toISOString(), abgegeben: z.abgegeben ? new Date(z.abgegeben).toISOString() : null, minuten_genutzt:z.minuten||null, antworten:k.aufgaben.map(a => ({ nr:a.nr, punkte_max:a.punkte, antwort:z.antworten[a.nr]||"" })) }, null, 1);
+  const name = "klausur_"+id+"_"+today()+".json";
+  const done = t => { const m = $("#klmsg"); if (m) m.textContent = t; };
+  try { const dl = null;
+    if (dl){ await dl.save({ filename:name, data }); done("Export bereit: "+name+"."); return; } }
+  catch(e){ done("Export abgebrochen."); return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data],{type:"application/json"})); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  done("Export gespeichert: "+name+".");
+}
+
+/* ---------- Daten-Ansicht ---------- */
+function renderDaten(){
+  const el = $("#v-daten");
+  const m = minutes();
+  el.innerHTML = `
+    <div class="panel stack"><h2>Lernzeit pro Tag</h2>
+      <label for="min" class="row" style="justify-content:space-between"><span>Geplante Minuten</span><b class="mono" id="minv">${m} min</b></label>
+      <input type="range" id="min" min="10" max="90" step="5" value="${m}">
+      <p class="muted" style="margin:0" id="minh">Bis zu ${Math.round(m*0.5)} neue Karten am Tag. Gibt es viele fällige Wiederholungen, kommen weniger neue dazu.</p>
+    </div>
+    <div class="panel stack"><h2>Speicherort</h2>
+      <p style="margin:0">Dein Lernstand liegt nur auf diesem Gerät in diesem Browser. Niemand sonst sieht ihn.</p>
+      <p class="muted" style="margin:0">Mit Export und Import nimmst du deinen Stand auf ein anderes Gerät mit oder sicherst ihn. Beim Import gewinnt pro Karte der neuere Stand, nichts wird überschrieben.</p>
+      <div class="row"><button class="btn" id="exp">Lernstand exportieren</button><label class="btn" for="imp" style="display:inline-block">Lernstand importieren</label><input type="file" id="imp" accept=".json,application/json" hidden></div>
+      <p id="dmsg" class="muted" style="margin:0" aria-live="polite"></p>
+    </div>
+    ${location.protocol !== "file:" ? `<div class="panel stack"><h2>Immer aktuell</h2>
+      <p style="margin:0">Kartenstand <b class="mono">${D.stand ? fmtDate(D.stand) : "?"}</b>. Neue Karten kommen automatisch, sobald du online bist. Du musst nichts herunterladen. Dein Lernstand liegt in diesem Browser auf diesem Gerät. Für ein anderes Gerät: hier exportieren, dort importieren.</p>
+    </div>` : `<div class="panel stack"><h2>Neue Version holen</h2>
+      <p style="margin:0">Dein Kartenstand ist vom <b class="mono">${D.stand ? fmtDate(D.stand) : "?"}</b>. Neue Karten kommen jede Woche dazu.</p>
+      <p class="muted" style="margin:0">So aktualisierst du: neue Datei <code>Lernapp_BPIT_SuV.html</code> herunterladen und die alte Datei <b>am selben Ort mit demselben Namen</b> ersetzen. Im selben Browser öffnen. Dein Lernstand bleibt erhalten. Sicherheitshalber vorher „Lernstand exportieren“.</p>
+      ${UPDATE_URL ? `<p style="margin:0"><a class="btn" href="${esc(UPDATE_URL)}" target="_blank" rel="noopener">Ordner mit der neuesten Version öffnen</a></p>` : ""}
+    </div>`}
+    <div class="panel"><span class="label">Kartenstand</span><p style="margin:4px 0 0">${KARTEN.length} Karten in ${(n => n+(n===1?" Woche":" Wochen"))(new Set(KARTEN.map(k => k.kw)).size)}. Datenstand <span class="mono">${esc(D.stand||"?")}</span>. Gerät <span class="mono">${esc(DEV)}</span>.</p></div>`;
+  const r = $("#min");
+  r.oninput = () => { $("#minv").textContent = r.value+" min"; $("#minh").textContent = `Bis zu ${Math.round(r.value*0.5)} neue Karten am Tag. Gibt es viele fällige Wiederholungen, kommen weniger neue dazu.`; };
+  r.onchange = () => { S.settings = { min:+r.value, t:Date.now() }; markDirty(null); };
+  $("#exp").onclick = exportState;
+  $("#imp").onchange = e => { const f = e.target.files[0]; if (!f) return; const fr = new FileReader(); fr.onload = () => { try { const j = JSON.parse(fr.result); if (j.app !== "bpit-lernapp") throw 0; const before = Object.keys(S.cards).length; mergeInto(S, j); for (const id in S.cards) dirty.add(docName(kwOf(id))); markDirty(null); $("#dmsg").textContent = `Importiert. ${Object.keys(S.cards).length - before} neue Karteneinträge, neuere Stände übernommen.`; } catch(x){ $("#dmsg").textContent = "Die Datei ist kein Lernstand dieser App."; } }; fr.readAsText(f); e.target.value = ""; };
+}
+async function exportState(){
+  const data = JSON.stringify({ app:"bpit-lernapp", v:1, exportiert:new Date().toISOString(), geraet:DEV, cards:S.cards, log:S.log, settings:S.settings });
+  const name = "lernstand_"+today()+".json"; const msg = $("#dmsg");
+  try {
+    const dl = null;
+    if (dl){ await dl.save({ filename:name, data }); msg.textContent = "Export bereit: "+name; return; }
+  } catch(e){ msg.textContent = "Export abgebrochen."; return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data],{type:"application/json"})); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  msg.textContent = "Export gespeichert: "+name;
+}
+
+window.addEventListener("pagehide", () => { if (KL) klSpeichern(true); if (sess) logTime(); lsSet(LS_KEY, JSON.stringify(S)); });
+show("heute");
+};
+</script>
+<script>
+/* Lader: Schlüssel aus dem Link, Karten entschlüsseln, offline aus dem Speicher */
+(async function(){
+  "use strict";
+  const K_LS = "bpit-schluessel", D_LS = "bpit-karten";
+  const box = document.getElementById("lader");
+  const say = (t) => { box.innerHTML = t; };
+  const get = (k) => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+  const set = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+  const b64 = (s) => { s = s.replace(/-/g,"+").replace(/_/g,"/"); while (s.length % 4) s += "="; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+
+  const m = /[#&]k=([A-Za-z0-9_-]{40,})/.exec(location.hash);
+  let key = m ? m[1] : get(K_LS);
+  if (m) set(K_LS, m[1]);
+  if (!key){
+    say("<h2>Kein Zugang</h2><p>Bitte die App über den Link aus der Gruppe öffnen.</p>");
+    return;
+  }
+
+  let daten = null;
+  try {
+    if (!crypto || !crypto.subtle) throw new Error("kein crypto");
+    const r = await fetch("daten.bin?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("http " + r.status);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    const ck = await crypto.subtle.importKey("raw", b64(key), "AES-GCM", false, ["decrypt"]);
+    let klar;
+    try { klar = await crypto.subtle.decrypt({ name: "AES-GCM", iv: buf.slice(0, 12) }, ck, buf.slice(12)); }
+    catch(e){
+      if (m){ say("<h2>Link ungültig</h2><p>Der Link ist veraltet oder unvollständig. Bitte den aktuellen Link aus der Gruppe nehmen.</p>"); return; }
+      throw e;
+    }
+    const txt = new TextDecoder().decode(klar);
+    daten = JSON.parse(txt);
+    set(D_LS, txt);
+  } catch(e){
+    const alt = get(D_LS);
+    if (alt){ try { daten = JSON.parse(alt); } catch(x){} }
+  }
+  if (!daten){
+    say("<h2>Keine Verbindung</h2><p>Beim allerersten Start braucht die App einmal Internet. Danach geht sie auch offline.</p>");
+    return;
+  }
+  window.LERNDATEN = daten;
+  box.remove();
+  document.getElementById("app").hidden = false;
+  window.__appStart();
+
+  if ("serviceWorker" in navigator && location.protocol === "https:"){
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+})();
+
+</script>
+</body>
+</html>
