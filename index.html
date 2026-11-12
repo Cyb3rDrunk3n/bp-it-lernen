@@ -255,7 +255,7 @@ function schedule(st, g){
 function minutes(){ return Math.min(90, Math.max(10, S.settings.min||30)); }
 function newToday(){ const t = today(); let n = 0; for (const id in S.cards) if (S.cards[id].f === t) n++; return n; }
 function dueIds(){ const t = today(); return KARTEN.filter(k => S.cards[k.id] && S.cards[k.id].d <= t).map(k => k.id); }
-function newIds(){ return KARTEN.filter(k => !S.cards[k.id]).sort((a,b) => (a.kw<b.kw?-1:a.kw>b.kw?1:a._i-b._i)).map(k => k.id); }
+function newIds(){ return KARTEN.filter(k => !S.cards[k.id] && k.kw !== "ZUSATZ").sort((a,b) => (a.kw<b.kw?-1:a.kw>b.kw?1:a._i-b._i)).map(k => k.id); }
 function plan(){
   const due = dueIds(), m = minutes();
   const quota = Math.round(m*0.5);
@@ -597,7 +597,7 @@ function renderStoff(){
   el.innerHTML = `
     <div class="panel"><h2>Nach Prüfungsteil</h2><div class="list" style="margin-top:6px">
       ${Object.keys(TEILE).sort().map(t => { const s = stats(KARTEN.filter(k => String(k.teil) === t)); return `
-        <div class="item"><div><b>Teil ${t}: ${esc(TEILE[t].name)}</b> <span class="muted">· ${TEILE[t].gewicht} %</span><div class="muted" style="font-size:.85rem">${s.n} Karten, ${s.gesehen} gesehen</div></div>
+        <div class="item"><div><b>Teil ${t}: ${esc(TEILE[t].name)}</b> <span class="muted">· ${TEILE[t].gewicht ? TEILE[t].gewicht+" %" : "Zusatz, freiwillig"}</span><div class="muted" style="font-size:.85rem">${s.n} Karten, ${s.gesehen} gesehen</div></div>
         <button class="btn small" data-teil="${t}" ${s.n?"":"disabled"}>Üben</button></div>`; }).join("")}
     </div></div>
     <div class="panel"><h2>Nach Woche</h2><div class="list" style="margin-top:6px">
@@ -629,7 +629,7 @@ function renderStat(){
       <div><span class="label">Gewichtete Sicherheit</span><div class="big">${Math.round(gw*100)} %</div>
       <p class="muted" style="margin:4px 0 0">Gefestigte Karten (Abstand ab 21 Tagen) zählen voll, Karten im Aufbau halb. Gewichtet nach den Prüfungsteilen${withCards.length<rows.length?", bisher nur Teile mit Karten":""}.</p></div>
       <div class="tbl-wrap"><table><thead><tr><th>Teil</th><th>Gewicht</th><th>Karten</th><th>Neu</th><th>Aufbau</th><th>Gefestigt</th><th>Sicherheit</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${r.t} ${esc(TEILE[r.t].name)}</td><td class="n">${r.g} %</td><td class="n">${r.s.n}</td><td class="n">${r.s.neu}</td><td class="n">${r.s.aufbau}</td><td class="n">${r.s.fest}</td><td class="n">${r.s.n?Math.round(r.s.sicher*100)+" %":"–"}</td></tr>`).join("")}
+      ${rows.map(r => `<tr><td>${r.t} ${esc(TEILE[r.t].name)}</td><td class="n">${r.g ? r.g+" %" : "–"}</td><td class="n">${r.s.n}</td><td class="n">${r.s.neu}</td><td class="n">${r.s.aufbau}</td><td class="n">${r.s.fest}</td><td class="n">${r.s.n?Math.round(r.s.sicher*100)+" %":"–"}</td></tr>`).join("")}
       </tbody></table></div>
     </div>
     <div class="panel"><h3>Fällige Karten, nächste 7 Tage</h3>
