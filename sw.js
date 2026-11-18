@@ -1,5 +1,5 @@
 /* Offline-Hülle: Seite und Schriften aus dem Zwischenspeicher, wenn kein Netz */
-const CACHE = "bpit-947e42702e";
+const CACHE = "bpit-77913d34e2";
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "./index.html", "./icon.png"]).catch(() => {})).then(() => self.skipWaiting()));
 });

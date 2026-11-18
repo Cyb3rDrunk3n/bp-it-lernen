@@ -135,6 +135,33 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 @media (max-width:520px){.today-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.figure b{font-size:1.35rem}.fields,.pairs{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:520px){.item.kl{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+svg.k text{font-family:var(--f-body)}
+svg.k .t{fill:var(--ink)}svg.k .tm{fill:var(--muted)}svg.k .ta{fill:var(--accent)}svg.k .tg{fill:var(--good)}svg.k .tb{fill:var(--bad)}svg.k .tw{fill:var(--warn)}svg.k .tx{fill:var(--surface)}
+svg.k .k-cloud{fill:var(--accent-soft);stroke:var(--accent)}svg.k .k-sec{fill:var(--bad-soft);stroke:var(--bad)}svg.k .k-srv{fill:var(--good-soft);stroke:var(--good)}svg.k .k-bak{fill:var(--warn-soft);stroke:var(--warn)}svg.k .k-net{fill:var(--surface-2);stroke:var(--ink)}svg.k .k-cli{fill:var(--surface);stroke:var(--muted)}svg.k .k-plain{fill:var(--surface);stroke:var(--line)}svg.k .k-grey{fill:var(--surface-2);stroke:var(--line)}
+svg.k .k-zone{stroke:var(--muted)}svg.k .k-zcloud{stroke:var(--accent)}svg.k .k-zsec{stroke:var(--bad)}svg.k .k-zsrv{stroke:var(--good)}svg.k .k-zbak{stroke:var(--warn)}
+svg.k .k-facc{fill:var(--accent);stroke:var(--accent)}svg.k .k-fgood{fill:var(--good);stroke:var(--good)}svg.k .k-fbad{fill:var(--bad);stroke:var(--bad)}svg.k .k-fwarn{fill:var(--warn);stroke:var(--warn)}svg.k .k-fline{fill:var(--line);stroke:var(--line)}
+svg.k .k-pill,svg.k .k-hole{fill:var(--surface)}
+svg.k .ln{stroke:var(--muted)}svg.k .ln-a{stroke:var(--accent)}svg.k .ln-b{stroke:var(--bad)}svg.k .ln-g{stroke:var(--good)}svg.k .ln-i{stroke:var(--ink)}svg.k .ln-w{stroke:var(--warn)}svg.k .ln-l{stroke:var(--line)}
+svg.k .fm{fill:var(--muted)}svg.k .fa{fill:var(--accent)}svg.k .fb{fill:var(--bad)}svg.k .fg{fill:var(--good)}svg.k .fi{fill:var(--ink)}svg.k .fw{fill:var(--warn)}
+.fig{margin:12px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}.fig[data-zoom]{cursor:zoom-in}.fig.zoom svg{width:220%!important;max-width:none!important}.fig.zoom{cursor:zoom-out}
+.fig figcaption{color:var(--muted)}
+
+.answer b{color:var(--accent)}
+.kern{border-left:4px solid var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:6px;margin:0 0 8px;font-weight:500}
+ul.pkt{margin:6px 0 0;padding-left:1.25em}ul.pkt li{margin:5px 0}ul.pkt li::marker{color:var(--accent)}
+.merk{border-left:4px solid var(--warn);background:var(--warn-soft);padding:8px 12px;border-radius:6px;margin-top:10px;font-size:.95rem}
+.merk b{color:inherit}
+.falle{border-left:4px solid var(--bad);background:var(--bad-soft);padding:8px 12px;border-radius:6px;margin-top:10px;font-size:.95rem}
+.falle b{color:inherit}
+.tag{display:inline-block;font:600 .74rem/1.55 var(--f-mono);padding:0 6px;border-radius:4px;margin-right:5px;vertical-align:1px;white-space:nowrap}
+.t-plus{background:var(--good-soft);color:var(--good)}.t-minus{background:var(--bad-soft);color:var(--bad)}.t-info{background:var(--accent-soft);color:var(--accent)}.t-warn{background:var(--warn-soft);color:var(--warn)}
+.plus{color:var(--good);font-weight:600}.minus{color:var(--bad);font-weight:600}
+table.ports td,table.ports th{padding:5px 6px;font-size:.86rem;vertical-align:top}
+table.ports .pg td{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;padding:4px 6px}
+table.ports td.pn{font-family:var(--f-mono);font-weight:600;white-space:nowrap}table.ports td.pn small{display:block;font-weight:400;color:var(--muted);font-size:.68rem}
+.kp-nav{margin:6px 0 12px;gap:6px}.kp-sec{border-top:1px solid var(--line);padding-top:14px;margin-top:14px;scroll-margin-top:10px}
+.kp-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}.kp-h small{font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:.8rem}
+.kp-n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:.9rem;flex:none}
 </style>
 </head>
 <body>
@@ -301,7 +328,7 @@ function renderHeute(){
       <button class="btn" id="fehler" ${fehlerIds().length?"":"disabled"}>Fehlerkiste (${fehlerIds().length})</button></div>
       <p class="muted" style="margin:0;font-size:.85rem">Fehlerkiste: alle Karten, die du falsch hattest. Eine Karte verlässt die Kiste, wenn du sie zweimal hintereinander richtig hast.</p>
     </div>
-    ${examHtml}
+    ${examHtml}${kompaktPanel()}
     <div class="panel stack" id="gezielt"><h2>Gezielt lernen</h2>
       <p class="muted" style="margin:0">Wähle Kalenderwoche, Themengebiet oder Prüfungsteil und wie lange du lernen willst. Leer lassen heißt alles.</p>
       <div class="pairs" style="grid-template-columns:minmax(0,9rem) minmax(0,1fr)">
@@ -317,6 +344,7 @@ function renderHeute(){
   const x = $("#extra"); if (x) x.onclick = () => startSession(shuffle(KARTEN.filter(k => S.cards[k.id])).slice(0, m*2).map(k => ({id:k.id, ueben:true})), "Freies Üben");
   const fk = $("#fehler"); if (fk) fk.onclick = () => startSession(shuffle(fehlerIds()).map(id => ({id, ueben:true, fehler:true})), "Fehlerkiste");
   setupGezielt();
+  bindKompakt(el);
   const ep = $("#exam-practice"); if (ep) ep.onclick = () => practiseFilter(k => String(k.teil) === String(ex.teil), "Teil "+ex.teil);
 }
 function wkey(w){ return w.endsWith("VORB") ? w.slice(0,4)+"-KW00" : w; }
@@ -429,6 +457,7 @@ function rate(g){
   logTime(); sess.done++; markDirty(k.id);
   pos++; nextCard();
 }
+document.addEventListener("click", e => { const f = e.target.closest && e.target.closest(".fig[data-zoom]"); if (f) f.classList.toggle("zoom"); });
 document.addEventListener("keydown", e => {
   if (view !== "lernen" || !cur) return;
   if (e.target && e.target.tagName === "TEXTAREA" && !(e.key === "Enter" && (e.ctrlKey || e.metaKey))) return;
@@ -615,10 +644,33 @@ function renderStoff(){
         <div class="item"><div style="min-width:0"><b>${esc(W.titel||w)}</b><div class="muted mono" style="font-size:.8rem">${esc(w)}${W.von?` · ${fmtDate(W.von)} bis ${fmtDate(W.bis)}`:""}</div>
         <div class="bar" style="margin-top:6px"><span style="width:${s.n?Math.round(s.gesehen/s.n*100):0}%"></span></div>
         <div class="muted" style="font-size:.8rem;margin-top:2px">${s.gesehen} von ${s.n} gesehen${s.schwach?`, ${s.schwach} oft vergessen`:""}${W.lernzettel?` · Lernzettel: ${esc(W.lernzettel)}`:""}</div></div>
-        <button class="btn small" data-kw="${esc(w)}">Üben</button></div>`; }).join("") : '<p class="muted">Noch keine Wochen.</p>'}
+        <div class="row" style="gap:6px;justify-content:flex-end">${W.kompakt?`<button class="btn small" data-kompakt="${esc(w)}">Kompakt</button>`:""}<button class="btn small" data-kw="${esc(w)}">Üben</button></div></div>`; }).join("") : '<p class="muted">Noch keine Wochen.</p>'}
     </div></div>`;
   el.querySelectorAll("[data-teil]").forEach(b => b.onclick = () => practiseFilter(k => String(k.teil) === b.dataset.teil, "Teil "+b.dataset.teil));
   el.querySelectorAll("[data-kw]").forEach(b => b.onclick = () => practiseFilter(k => k.kw === b.dataset.kw, b.dataset.kw));
+  bindKompakt(el);
+}
+/* ---------- Kompakt-Seite einer Woche ---------- */
+function kompaktWochen(){ return WOCHEN_SORT.filter(w => (WOCHEN[w]||{}).kompakt).sort((a,b) => wkey(a) < wkey(b) ? 1 : -1); }
+function kompaktPanel(){
+  const ws = kompaktWochen().slice(0, 2); if (!ws.length) return "";
+  return ws.map(w => { const W = WOCHEN[w]; return `<div class="notice calm"><b>${esc((W.titel||w).split(":")[0])} kompakt</b>: alles Wichtige mit Bildern und Merksätzen auf einer Seite.
+    <div class="row" style="margin-top:8px"><button class="btn small" data-kompakt="${esc(w)}">Kompakt lesen</button><button class="btn small" data-kwueben="${esc(w)}">Karten der Woche üben</button></div></div>`; }).join("");
+}
+function bindKompakt(el){
+  el.querySelectorAll("[data-kompakt]").forEach(b => b.onclick = () => showKompakt(b.dataset.kompakt));
+  el.querySelectorAll("[data-kwueben]").forEach(b => b.onclick = () => practiseFilter(k => k.kw === b.dataset.kwueben, b.dataset.kwueben));
+}
+function showKompakt(w){
+  const W = WOCHEN[w] || {}; if (!W.kompakt) return;
+  show("stoff");
+  const el = $("#v-stoff");
+  el.innerHTML = `<div class="panel stack"><div class="row" style="justify-content:space-between"><h2 style="min-width:0">${esc((W.titel||w).split(":")[0])} kompakt</h2><button class="btn small" id="kp-back">Zurück</button></div>
+    <div>${W.kompakt}</div><div class="row"><button class="btn primary" id="kp-ueben">Karten der Woche üben</button><button class="btn" id="kp-back2">Zurück zur Übersicht</button></div></div>`;
+  el.querySelectorAll("[data-kp]").forEach(b => b.onclick = () => { const t = document.getElementById(b.dataset.kp); if (t) t.scrollIntoView({ behavior:"smooth", block:"start" }); });
+  $("#kp-back").onclick = () => renderStoff(); $("#kp-back2").onclick = () => renderStoff();
+  $("#kp-ueben").onclick = () => practiseFilter(k => k.kw === w, w);
+  window.scrollTo(0, 0);
 }
 
 /* ---------- Statistik ---------- */
@@ -815,6 +867,11 @@ show("heute");
     say("<h2>Keine Verbindung</h2><p>Beim allerersten Start braucht die App einmal Internet. Danach geht sie auch offline.</p>");
     return;
   }
+  // Bilder einmalig gespeichert, hier in Karten und Kompakt-Seiten einsetzen
+  const BIL = daten.bilder || {};
+  const bx = v => typeof v === "string" && v.indexOf('data-bild="') >= 0 ? v.replace(/<figure data-bild="([\w-]+)"><\/figure>/g, (m, n) => BIL[n] || "") : v;
+  (daten.karten || []).forEach(k => { for (const f in k){ const v = k[f]; if (typeof v === "string") k[f] = bx(v); else if (Array.isArray(v)) k[f] = v.map(x => Array.isArray(x) ? x.map(bx) : bx(x)); } });
+  Object.keys(daten.wochen || {}).forEach(w => { const W = daten.wochen[w]; if (W && W.kompakt) W.kompakt = bx(W.kompakt); });
   window.LERNDATEN = daten;
   box.remove();
   document.getElementById("app").hidden = false;
