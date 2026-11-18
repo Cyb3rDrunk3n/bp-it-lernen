@@ -80,6 +80,8 @@ button{font-family:var(--f-body)}
 .q{font-size:1.12rem;font-weight:500;min-width:0;overflow-wrap:anywhere}
 .answer{border-top:1px dashed var(--line);margin-top:14px;padding-top:14px;min-width:0;overflow-wrap:anywhere}
 .expl{color:var(--muted);font-size:.92rem;margin-top:8px}
+.eigen{font:inherit;width:100%;box-sizing:border-box;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);resize:vertical}
+.mine{border-left:3px solid var(--line);padding:6px 10px;margin-bottom:10px;color:var(--muted)}
 .src{color:var(--muted);font-size:.78rem;margin-top:10px;font-family:var(--f-mono)}
 .opts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .opt{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer;font:inherit}
@@ -429,7 +431,8 @@ function rate(g){
 }
 document.addEventListener("keydown", e => {
   if (view !== "lernen" || !cur) return;
-  if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.key !== "Enter") return;
+  if (e.target && e.target.tagName === "TEXTAREA" && !(e.key === "Enter" && (e.ctrlKey || e.metaKey))) return;
+  if (e.target && /INPUT|SELECT/.test(e.target.tagName) && e.key !== "Enter") return;
   if (!cur.checked && (e.key === "Enter" || e.key === " ")){ const b = $("#check"); if (b){ e.preventDefault(); b.click(); } }
   else if (cur.checked && ["1","2","3"].includes(e.key)){ e.preventDefault(); rate(+e.key - 1); }
 });
@@ -437,8 +440,15 @@ document.addEventListener("keydown", e => {
 /* ---------- Aufgabentypen ---------- */
 const TYPES = {
   qa(k, el){
-    el.innerHTML = `<div class="q">${k.frage}</div><div class="row" style="margin-top:14px"><button class="btn primary" id="check">Antwort zeigen</button></div>`;
-    $("#check").onclick = () => { $("#check").remove(); revealArea(k.antwort); };
+    el.innerHTML = `<div class="q">${k.frage}</div>
+      <textarea id="eigen" class="eigen" rows="5" placeholder="Erst selbst ausformulieren, in ganzen Sätzen, dann vergleichen. (Strg+Enter zeigt die Lösung)"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="check">Antwort zeigen</button></div>`;
+    $("#check").onclick = () => {
+      const t = ($("#eigen").value || "").trim();
+      $("#check").remove(); $("#eigen").remove();
+      const mine = t ? `<div class="mine"><div class="label">Deine Antwort</div>${esc(t).replace(/\n/g,"<br>")}</div><div class="label" style="margin-top:10px">Musterlösung</div>` : "";
+      revealArea(mine + k.antwort + (t ? `<div class="muted" style="font-size:.85rem;margin-top:8px">Vergleiche: Hast du Definition, Begründung und ein Beispiel? Fehlt ein Kernpunkt, ehrlich „Nochmal“ wählen.</div>` : ""));
+    };
   },
   mc(k, el){
     const multi = (k.richtig||[]).length > 1;
