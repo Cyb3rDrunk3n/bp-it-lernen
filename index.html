@@ -162,6 +162,28 @@ table.ports td.pn{font-family:var(--f-mono);font-weight:600;white-space:nowrap}t
 .kp-nav{margin:6px 0 12px;gap:6px}.kp-sec{border-top:1px solid var(--line);padding-top:14px;margin-top:14px;scroll-margin-top:10px}
 .kp-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}.kp-h small{font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:.8rem}
 .kp-n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:.9rem;flex:none}
+
+.np{position:relative;max-width:520px;margin:10px auto 0;container-type:inline-size}
+.np>svg{display:block;width:100%;height:auto}
+.np-hint{font-size:.85rem;margin-top:4px}
+.np-slot{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1px 3px;border:2px dashed var(--accent);border-radius:7px;background:var(--surface);color:var(--ink);font:600 11px/1.12 var(--f-body);font-size:clamp(8.5px,3.05cqw,13px);text-align:center;cursor:pointer;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.np-slot .np-q{color:var(--accent);font-family:var(--f-mono);font-size:1.15em;opacity:.7}
+.np-slot.target{background:var(--accent-soft)}
+.np-slot.filled{border-style:solid;border-color:var(--ink);background:var(--surface-2)}
+.np-slot.hover{outline:3px solid var(--accent);outline-offset:1px}
+.np-slot.ok{border:2px solid var(--good);background:var(--good-soft)}
+.np-slot.no{border:2px solid var(--bad);background:var(--bad-soft)}
+.np-slot .np-soll{display:block;color:var(--good);font-size:.92em;margin-top:1px}
+.np-bank{position:sticky;bottom:0;z-index:5;display:flex;flex-wrap:wrap;gap:6px;padding:10px 2px 8px;margin-top:10px;background:var(--surface);border-top:1px solid var(--line);max-height:40vh;overflow-y:auto}
+.np-chip{font:600 .86rem/1.25 var(--f-body);padding:7px 11px;border-radius:999px;border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;text-align:left}
+.np-chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.np-ghost{position:fixed;left:0;top:0;z-index:100;pointer-events:none;transform:translate(-50%,-130%);padding:7px 11px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 .86rem var(--f-body);box-shadow:0 6px 18px rgba(0,0,0,.28);white-space:nowrap}
+ol.np-info{list-style:none;padding:0;margin:6px 0 10px}
+ol.np-info li{padding:8px 10px;border:1px solid var(--line);border-left-width:4px;border-radius:8px;margin:6px 0;font-size:.92rem}
+ol.np-info li.ok{border-left-color:var(--good)}ol.np-info li.no{border-left-color:var(--bad)}ol.np-info li.x{border-style:dashed;border-left-style:solid;border-left-color:var(--muted)}
+ol.np-info li .muted{font-size:.88rem}
+ol.np-info li.flash{animation:npFlash 1.2s}
+@keyframes npFlash{0%{background:var(--warn-soft)}100%{background:transparent}}
 </style>
 </head>
 <body>
@@ -460,6 +482,7 @@ function rate(g){
 document.addEventListener("click", e => { const f = e.target.closest && e.target.closest(".fig[data-zoom]"); if (f) f.classList.toggle("zoom"); });
 document.addEventListener("keydown", e => {
   if (view !== "lernen" || !cur) return;
+  if (e.target && e.target.closest && e.target.closest(".np, .np-bank")) return;
   if (e.target && e.target.tagName === "TEXTAREA" && !(e.key === "Enter" && (e.ctrlKey || e.metaKey))) return;
   if (e.target && /INPUT|SELECT/.test(e.target.tagName) && e.key !== "Enter") return;
   if (!cur.checked && (e.key === "Enter" || e.key === " ")){ const b = $("#check"); if (b){ e.preventDefault(); b.click(); } }
@@ -530,6 +553,102 @@ const TYPES = {
       k.paare.forEach((p,i) => { const s = $("#pair"+i); const ok = s.value === p[1]; s.classList.add(ok?"right":"wrong"); s.disabled = true; if (!ok){ all = false; s.insertAdjacentHTML("afterend", `<div></div><div class="expl" style="margin-top:0">richtig: ${esc(p[1])}</div>`); } });
       cur.correct = all; $("#check").remove(); revealArea(k.antwort || "");
     };
+  },
+  netzplan(k, el){
+    const W = k.vb[0], H = k.vb[1], T = {}, P = {};
+    (k.teile || []).forEach(t => T[t.id] = t);
+    let SEL = null, drag = null, ghost = null, raf = 0, lastY = 0, swallow = false;
+    const order = shuffle(k.teile.map(t => t.id));
+    const pct = (v, m) => (v / m * 100).toFixed(3) + "%";
+    el.innerHTML = `<div class="q">${k.frage}</div>
+      <div class="muted np-hint">Teil antippen, dann das Feld antippen. Am PC kannst du auch ziehen. Ein besetztes Feld antippen hebt das Teil wieder auf.</div>
+      <div class="np"><svg class="k" viewBox="0 0 ${W} ${H}" aria-hidden="true">${k.svg}</svg>
+      ${k.slots.map(s => `<button class="np-slot" data-s="${esc(s.id)}" style="left:${pct(s.x,W)};top:${pct(s.y,H)};width:${pct(s.w,W)};height:${pct(s.h,H)}"></button>`).join("")}</div>
+      <div class="np-bank"></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="check">Prüfen</button><span class="muted" id="np-count"></span></div>`;
+    const bank = el.querySelector(".np-bank");
+    const where = id => Object.keys(P).find(s => P[s] === id);
+    const draw = () => {
+      el.querySelectorAll(".np-slot").forEach(b => {
+        const t = P[b.dataset.s];
+        b.classList.toggle("filled", !!t); b.classList.toggle("target", !!SEL && !t);
+        b.innerHTML = t ? esc(T[t].name) : `<span class="np-q">?</span>`;
+        b.setAttribute("aria-label", t ? "Feld: " + T[t].name : "leeres Feld");
+      });
+      bank.innerHTML = order.filter(id => !where(id)).map(id => `<button class="np-chip" data-t="${esc(id)}" aria-pressed="${SEL === id}">${esc(T[id].name)}</button>`).join("")
+        || `<span class="muted" style="font-size:.85rem">Alle Teile verteilt. Jetzt prüfen.</span>`;
+      const c = el.querySelector("#np-count"); if (c) c.textContent = `${Object.keys(P).length} von ${k.slots.length} Feldern belegt`;
+    };
+    const place = (tid, sid) => { const o = where(tid); if (o) delete P[o]; P[sid] = tid; };
+    const unplace = tid => { const o = where(tid); if (o) delete P[o]; };
+    el.addEventListener("click", e => {
+      if (cur.checked){
+        const sl = e.target.closest(".np-slot"); if (!sl) return;
+        const s = k.slots.find(x => x.id === sl.dataset.s); const tid = (P[s.id] && s.ok.includes(P[s.id])) ? P[s.id] : s.ok[0];
+        const it = document.getElementById("npi-" + tid); if (it){ it.scrollIntoView({ behavior:"smooth", block:"center" }); it.classList.remove("flash"); void it.offsetWidth; it.classList.add("flash"); }
+        return;
+      }
+      if (swallow){ swallow = false; return; }
+      const ch = e.target.closest(".np-chip"), sl = e.target.closest(".np-slot");
+      if (ch){ SEL = SEL === ch.dataset.t ? null : ch.dataset.t; draw(); return; }
+      if (sl){ const sid = sl.dataset.s; if (SEL){ place(SEL, sid); SEL = null; } else if (P[sid]){ SEL = P[sid]; delete P[sid]; } draw(); }
+    });
+    const hit = (x, y) => { const t = document.elementFromPoint(x, y); return t ? (t.closest(".np-slot") || t.closest(".np-bank")) : null; };
+    const tick = () => { if (!drag || !drag.on) return; if (lastY < 70) window.scrollBy(0, -12); else if (lastY > innerHeight - 70) window.scrollBy(0, 12); raf = requestAnimationFrame(tick); };
+    el.addEventListener("pointerdown", e => {
+      if (cur.checked || e.button > 0) return;
+      const src = e.target.closest(".np-chip, .np-slot.filled"); if (!src) return;
+      if (e.pointerType !== "mouse" && !src.classList.contains("np-chip")) return;
+      drag = { tid: src.dataset.t || P[src.dataset.s], x: e.clientX, y: e.clientY, on: false, pid: e.pointerId, src };
+    });
+    el.addEventListener("pointermove", e => {
+      if (!drag || e.pointerId !== drag.pid) return;
+      if (!drag.on){
+        if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+        drag.on = true; ghost = document.createElement("div"); ghost.className = "np-ghost"; ghost.textContent = T[drag.tid].name; document.body.appendChild(ghost);
+        try { drag.src.setPointerCapture(e.pointerId); } catch(x){}
+        tick();
+      }
+      e.preventDefault(); lastY = e.clientY;
+      ghost.style.left = e.clientX + "px"; ghost.style.top = e.clientY + "px";
+      el.querySelectorAll(".np-slot.hover").forEach(x => x.classList.remove("hover"));
+      const t = hit(e.clientX, e.clientY); if (t && t.classList.contains("np-slot")) t.classList.add("hover");
+    });
+    const end = e => {
+      if (!drag || e.pointerId !== drag.pid) return;
+      if (drag.on){
+        const t = e.type === "pointerup" ? hit(e.clientX, e.clientY) : null;
+        if (t && t.classList.contains("np-slot")) place(drag.tid, t.dataset.s); else if (e.type === "pointerup") unplace(drag.tid);
+        if (ghost) ghost.remove(); ghost = null; cancelAnimationFrame(raf); SEL = null; swallow = true; setTimeout(() => swallow = false, 60); draw();
+      }
+      drag = null;
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+    el.querySelector("#check").onclick = () => {
+      if (cur.checked) return;
+      let all = true; const falsch = [];
+      k.slots.forEach(s => {
+        const b = el.querySelector(`.np-slot[data-s="${s.id}"]`); const t = P[s.id]; const ok = !!t && s.ok.includes(t);
+        const soll = [...new Set(s.ok.filter(x => !(P[s.id] && false)).map(x => T[x].name))];
+        b.classList.remove("target"); b.classList.add(ok ? "ok" : "no");
+        if (!ok){ all = false; const frei = s.ok.filter(x => !Object.keys(P).some(z => P[z] === x && k.slots.find(y => y.id === z).ok.includes(x)));
+          const zeig = (frei.length ? frei : s.ok).map(x => T[x].name);
+          b.insertAdjacentHTML("beforeend", `<span class="np-soll">→ ${esc(zeig[0])}</span>`); falsch.push(`${t ? esc(T[t].name) : "leeres Feld"} → <b>${esc(zeig[0])}</b>`); }
+      });
+      cur.correct = all;
+      if (!all) cur.lesson = falsch.join("<br>");
+      ["#check", "#np-count"].forEach(x => { const n = el.querySelector(x); if (n) n.remove(); }); bank.remove(); const h = el.querySelector(".np-hint"); if (h) h.remove();
+      const ziel = id => k.slots.filter(s => s.ok.includes(id));
+      const info = k.teile.map(t => {
+        const z = ziel(t.id), at = where(t.id);
+        if (!z.length) return `<li class="x" id="npi-${esc(t.id)}"><b>${esc(t.name)}</b> ${at ? '<span class="tag t-minus">gehört nicht hinein</span>' : '<span class="tag t-plus">richtig weggelassen</span>'}<div class="muted">${t.info || ""}</div></li>`;
+        const ok = !!at && z.some(s => s.id === at);
+        return `<li class="${ok ? "ok" : "no"}" id="npi-${esc(t.id)}"><b>${esc(t.name)}</b> ${ok ? '<span class="tag t-plus">richtig</span>' : '<span class="tag t-minus">falsch</span>'}<div class="muted">${t.info || ""}</div></li>`;
+      }).join("");
+      const ant = (k.antwort || "").replace(/<figure class="fig np-loesung"[\s\S]*?<\/figure>/, "");
+      revealArea(`<div class="label">Die Teile und ihre Aufgabe</div><ol class="np-info">${info}</ol>${ant}`);
+    };
+    draw();
   },
   rechnen(k, el){
     const g = GEN[k.gen]; if (!g){ el.innerHTML = `<p class="muted">Unbekannter Aufgabengenerator: ${esc(k.gen)}</p>`; return revealArea(""); }
